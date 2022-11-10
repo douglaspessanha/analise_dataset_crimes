@@ -1,0 +1,60 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.mycompany.projetoatp;
+
+
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+
+/**
+ *
+ * @author douglas.branco
+ */
+public class MainSpark {
+
+    public static void main(String args[]){
+
+        SparkConf conf = new SparkConf().setMaster("local[*]").setAppName("SparkAtp");
+        JavaSparkContext sc = new JavaSparkContext(conf);
+
+        JavaRDD<String> arquivo = sc.textFile("/home/Disciplinas/Frameworks/spark/ocorrencias_criminais_sample.csv");
+        //JavaRDD<String> arquivo = sc.textFile("hdfs://localhost/Frameworks/spark/ocorrencias_criminais.csv");
+
+        //filtro do tipo narcoticos
+
+         JavaRDD<String> filtrado = arquivo.filter(s ->
+        {
+            String [] campos =s.split(";") ;
+            String tipo = campos[4];
+            return tipo.equalsIgnoreCase("NARCOTICS");
+       });
+
+        //System.out.println(filtrado.collect());
+
+        //imprime numero de crimes por ano
+        JavaRDD<String> anoRDD = filtrado.map(s ->
+        {
+            String [] campos =s.split(";") ;
+            return campos[2];
+        });
+        //System.out.println(anoRDD.countByValue());
+        apresentarResultado(anoRDD.countByValue());
+         //}};
+    }
+
+        public static void apresentarResultado (Map<String, Long> genericRDD){
+            genericRDD.entrySet().forEach((entrada) -> {
+            System.out.println(entrada.getKey() + " = " + entrada.getValue());
+
+        });
+
+}
+}
